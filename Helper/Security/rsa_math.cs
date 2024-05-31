@@ -188,16 +188,6 @@ namespace Helper.Security
             BigInteger d = CalculateD(e, z);
             //var publicKey = GeneratePublicKey(n, e);
             //var privateKey = GeneratePrivateKey(n, d);
-
-            //Console.WriteLine($"Public Key: (n = {publicKey.Item1}, e = {publicKey.Item2})");
-            //Console.WriteLine($"Private Key: (n = {privateKey.Item1}, d = {privateKey.Item2})");
-
-            //string originalMessage = "holap rsa como va";
-            //string encryptedMessage = Encrypt(originalMessage, publicKey.Item1, publicKey.Item2);
-            //Console.WriteLine($"OriginalMessage: {originalMessage}");
-            //Console.WriteLine($"mensage encriptado: {encryptedMessage}");
-            //string decryptedMessage = Decrypt(encryptedMessage, privateKey.Item1, privateKey.Item2);
-            //Console.WriteLine($"mensage desencriptado: {decryptedMessage}");
             
             // Paso 5 y 6
             return (n, e, d);
