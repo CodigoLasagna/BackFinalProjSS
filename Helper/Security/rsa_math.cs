@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Numerics;
 using System.Text;
 using Domain;
@@ -152,15 +153,22 @@ namespace Helper.Security
         }
 
         // Encriptar un mensaje con la llave pública
-        public static BigInteger Encrypt(BigInteger message, BigInteger n, BigInteger e)
+        public static string Encrypt(string message, string n, string e)
         {
-            return BigInteger.ModPow(message, e, n);
+            BigInteger real_n = BigInteger.Parse(n);
+            BigInteger real_e = BigInteger.Parse(e);
+            BigInteger messageInBytes = new BigInteger(Encoding.UTF8.GetBytes(message));
+            return BigInteger.ModPow(messageInBytes, real_e, real_n).ToString("X");
         }
 
         // Desencriptar un mensaje con la llave privada
-        public static BigInteger Decrypt(BigInteger ciphertext, BigInteger n, BigInteger d)
+        public static string Decrypt(string ciphertext, string n, string d)
         {
-            return BigInteger.ModPow(ciphertext, d, n);
+            BigInteger real_n = BigInteger.Parse(n);
+            BigInteger real_d = BigInteger.Parse(d);
+            BigInteger cipherBigInteger = BigInteger.Parse(ciphertext, NumberStyles.HexNumber);
+            BigInteger messageTextIngeger = BigInteger.ModPow(cipherBigInteger, real_d, real_n);
+            return Encoding.UTF8.GetString(messageTextIngeger.ToByteArray());
         }
 
         // Function to demonstrate the complete RSA key generation
@@ -178,20 +186,20 @@ namespace Helper.Security
 
             // Paso 4
             BigInteger d = CalculateD(e, z);
-            // Paso 5 y 6
-            var publicKey = GeneratePublicKey(n, e);
-            var privateKey = GeneratePrivateKey(n, d);
+            //var publicKey = GeneratePublicKey(n, e);
+            //var privateKey = GeneratePrivateKey(n, d);
 
             //Console.WriteLine($"Public Key: (n = {publicKey.Item1}, e = {publicKey.Item2})");
             //Console.WriteLine($"Private Key: (n = {privateKey.Item1}, d = {privateKey.Item2})");
 
             //string originalMessage = "holap rsa como va";
-            //BigInteger bytesEnteringMessage = new BigInteger(Encoding.UTF8.GetBytes(originalMessage));
-            //BigInteger encryptedMessage = Encrypt(bytesEnteringMessage, publicKey.Item1, publicKey.Item2);
+            //string encryptedMessage = Encrypt(originalMessage, publicKey.Item1, publicKey.Item2);
+            //Console.WriteLine($"OriginalMessage: {originalMessage}");
             //Console.WriteLine($"mensage encriptado: {encryptedMessage}");
-            //BigInteger decryptedMessage = Decrypt(encryptedMessage, privateKey.Item1, privateKey.Item2);
-            //string decryptedMessageString = Encoding.UTF8.GetString(decryptedMessage.ToByteArray());
-            //Console.WriteLine($"mensage desencriptado: {decryptedMessageString}");
+            //string decryptedMessage = Decrypt(encryptedMessage, privateKey.Item1, privateKey.Item2);
+            //Console.WriteLine($"mensage desencriptado: {decryptedMessage}");
+            
+            // Paso 5 y 6
             return (n, e, d);
         }
     }

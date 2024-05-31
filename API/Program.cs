@@ -29,6 +29,10 @@ services.AddSwaggerGen();
 /*load services*/
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IUserRepository, UserRepository>();
+
+services.AddScoped<IPhishUserService, PhishUserService>();
+services.AddScoped<IPhishUserRepository, PhishUserRepository>();
+
 services.AddScoped<IRsaKeyService, RsaKeyService>();
 services.AddScoped<IRsaKeyRepository, RsaKeyRepository>();
 

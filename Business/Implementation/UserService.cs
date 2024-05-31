@@ -9,9 +9,19 @@ public class UserService(IUserRepository userRepository) : IUserService
 {
     public int Create(User entity)
     {
-        RsaMath.GenerateRSAKeys(1024);
         return userRepository.Create(entity);
     }
+
+    public int Create(User entity, int rsa_key)
+    {
+        return userRepository.Create(entity, rsa_key);
+    }
+
+    public string Login(string email, string password)
+    {
+        return userRepository.Login(email, password);
+    }
+
 
     public User Read(int Id)
     {
@@ -20,7 +30,7 @@ public class UserService(IUserRepository userRepository) : IUserService
 
     public bool Update(int Id, User entity)
     {
-        throw new NotImplementedException();
+        return userRepository.Update(Id, entity);
     }
 
     public bool Delete(int Id)

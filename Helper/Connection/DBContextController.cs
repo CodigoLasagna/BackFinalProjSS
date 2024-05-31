@@ -16,9 +16,8 @@ public class DBContextController : DbContext
             ServerVersion.AutoDetect(connectionString));
     }
     public DbSet<User> Users { get; set; }
+    public DbSet<PhishUser> PhishUsers { get; set; }
     public DbSet<RsaKey> RsaKeys { get; set; }
-    //public DbSet<ClienUser> ClienUsers { get; set; }
-    //public DbSet<Appointment> Appointments { get; set; }
 }
 public class DbConnection
 {
