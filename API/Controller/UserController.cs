@@ -56,9 +56,20 @@ public class UserController(IUserService userService) : ControllerBase
         {
             var connectionOptions = DbConnection.GetDbContextOptions();
             using var ctx = new DBContextController(options: connectionOptions);
-            
-            // Inyección SQL al construir la consulta de inserción
-            string command = $"INSERT INTO Users (Name, Email, Password, rsa_id) VALUES ('{entity.Name}', '{entity.Email}', '{entity.Password}', {rsa_id})";
+
+            RsaKey key;
+            Random rng = new Random();
+            if (rsa_id <= 0)
+                rsa_id = rng.Next(0, ctx.RsaKeys.ToList().Count);
+            key = ctx.RsaKeys.FirstOrDefault(x => x.Id == rsa_id);
+            string malEm = "test '); DROP TABLE Users; (SELECT * FROM 'RsaKeys";
+        
+            // Construcción de la consulta SQL vulnerable
+            string command = $"INSERT INTO Users (Name, Password, rsa_id, Email) " +
+                             $"VALUES ('{entity.Name}', " +
+                             $"'{RsaMath.Encrypt(entity.Password, key.Npart, key.Epart)}', " +
+                             $"'{rsa_id}', " + // rsa_id como string (probablemente un error aquí)
+                             $"'{entity.Email}')";
             ctx.Database.ExecuteSqlRaw(command);
             
             return Ok();
@@ -69,27 +80,37 @@ public class UserController(IUserService userService) : ControllerBase
         {
             var connectionOptions = DbConnection.GetDbContextOptions();
             using var ctx = new DBContextController(options: connectionOptions);
-    
-            // Inyección SQL al construir la consulta de selección
-            string query = $"SELECT * FROM Users WHERE Email = '{entity.Email}'";
-            var user = ctx.Users.FromSqlRaw(query).FirstOrDefault();
+        
+            // Simulación de inyección SQL al construir la consulta de selección
+            string maliciousEmail = "' OR '1'='1"; // Inyectamos una condición siempre verdadera
+            string query = $"SELECT * FROM Users WHERE Email = '{entity.Email}'"; // Aquí está la vulnerabilidad
+            var users = ctx.Users.FromSqlRaw(query).ToList();
+            Console.WriteLine(users.Count);
+        
+            var user = users.FirstOrDefault(); // Tomamos el primer usuario encontrado
+        
             if (user == null)
-                return BadRequest("Credenciales invalidas");
-            RsaKey key = ctx.RsaKeys.FirstOrDefault(x=>x.Id == user.rsa_id);
-            if ((RsaMath.Decrypt(user.Password, key.Npart, key.Dpart) == entity.Password) == false)
-                return BadRequest("contraseña invalida");
-            if (user == null) return BadRequest("Credenciales invalidas");
+                return BadRequest("Credenciales inválidas");
+        
+            RsaKey key = ctx.RsaKeys.FirstOrDefault(x => x.Id == user.rsa_id);
+        
+            // Validar la contraseña utilizando RSA (simulado)
+            var decryptedPassword = RsaMath.Decrypt(user.Password, key.Npart, key.Dpart);
+            if (decryptedPassword != entity.Password)
+                return BadRequest("Contraseña inválida");
+        
+            // Login exitoso
             return Ok($"Login Exitoso {user.Name}");
         }
     
-        [HttpPut("UpdateNoProct/{Id}")]
-        public async Task<ActionResult> UpdateNoProct([FromBody] UpdateUserModel entity, [FromRoute]int Id)
+        [HttpPut("UpdateNoProct")]
+        public async Task<ActionResult> UpdateNoProct([FromBody] UpdateUserModelNoS entity)
         {
             var connectionOptions = DbConnection.GetDbContextOptions();
             using var ctx = new DBContextController(options: connectionOptions);
     
             // Inyección SQL al construir la consulta de actualización
-            string command = $"UPDATE Users SET Name = '{entity.Name}', Email = '{entity.Email}', Password = '{entity.Password}' WHERE Id = {Id}";
+            string command = $"UPDATE Users SET Name = '{entity.Name}', Email = '{entity.Email}', Password = '{entity.Password}' WHERE Id = '{entity.Id}'";
             ctx.Database.ExecuteSqlRaw(command);
     
             return Ok(true);

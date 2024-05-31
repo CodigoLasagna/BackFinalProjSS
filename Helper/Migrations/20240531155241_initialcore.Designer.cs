@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helper.Migrations
 {
     [DbContext(typeof(DBContextController))]
-    [Migration("20240530165134_PhishUserTest")]
-    partial class PhishUserTest
+    [Migration("20240531155241_initialcore")]
+    partial class initialcore
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
